@@ -7,8 +7,11 @@
 //
 
 #import "ViewController.h"
+#import "CoreCalendarView.h"
+
 
 @interface ViewController ()
+
 
 @end
 
@@ -17,10 +20,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    CoreCalendarView *calendarView = [CoreCalendarView calendarViewWithCalendarType:CoreCalendarTypeHorizontal];
     
+    calendarView.frame = CGRectMake(0, 0, 320, 320);
     
-    
-    
+    [self.view addSubview:calendarView];
 }
+
+
+
+
+
+
 
 @end
