@@ -18,3 +18,12 @@
 
 
 
+@protocol CoreCalendarDelegate <NSObject>
+@required
+-(NSNumber *)coreCalendarLeftMonths;
+-(NSNumber *)coreCalendarRightMonths;
+
+@end
+
+
+

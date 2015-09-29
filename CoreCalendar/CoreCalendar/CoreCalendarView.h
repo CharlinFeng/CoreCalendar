@@ -11,7 +11,6 @@
 #import "CoreCalendarProtocol.h"
 
 
-
 @interface CoreCalendarView : UIView
 
 /** 菜单高度 */
@@ -21,8 +20,11 @@
 
 @property (nonatomic,strong) NSArray<NSString *> *timestampsOut;
 
-@property (nonatomic,assign) NSDate *leftDate,*rightDate;
+@property (nonatomic,assign) id<CoreCalendarDelegate> delegate;
 
+@property (nonatomic,assign) BOOL isDarkEarlierDays;
+
+@property (nonatomic,copy) BOOL (^ClickDayBlock)(NSDate *d);
 
 
 +(instancetype)calendarViewWithCalendarType:(CoreCalendarType)calendarType;

@@ -11,7 +11,7 @@
 #import "ServiceModel.h"
 
 
-@interface ViewController ()
+@interface ViewController ()<CoreCalendarDelegate>
 
 @property (nonatomic,strong) CoreCalendarView *calendarView;
 
@@ -25,10 +25,9 @@
     
     CoreCalendarView *calendarView = [CoreCalendarView calendarViewWithCalendarType:CoreCalendarTypeHorizontal];
     
-    calendarView.leftDate = [calendarView dateFromNowWithMonths:-2];
-//    calendarView.rightMonthDistance = 2;
-    
     self.calendarView=calendarView;
+    
+    calendarView.delegate = self;
     
     ServiceModel *m1 = [[ServiceModel alloc] init];
     m1.timestamp = @"1444694400";
@@ -49,12 +48,23 @@
     ServiceModel *m5 = [[ServiceModel alloc] init];
     m5.timestamp = @"1445385600";
     m5.offEdit = NO;
+
+    calendarView.isDarkEarlierDays = YES;
     
     self.calendarView.timestampsIn = @[m1,m2,m3,m4,m5];
 
     calendarView.frame = CGRectMake(10, 10, 300, 300);
     
     [self.view addSubview:calendarView];
+    
+    NSDate *date = [NSDate date];
+    
+    calendarView.ClickDayBlock =  ^BOOL(NSDate *d){
+    
+        BOOL res = date.timeIntervalSince1970 - 3600 * 24 <= d.timeIntervalSince1970;
+    
+        return res;
+    };
 }
 
 
@@ -65,6 +75,14 @@
     
 }
 
+
+-(NSNumber *)coreCalendarLeftMonths{
+    return @-1;
+}
+
+-(NSNumber *)coreCalendarRightMonths{
+    return @2;
+}
 
 
 

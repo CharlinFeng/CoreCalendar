@@ -10,7 +10,7 @@
 #import "CoreCalendarDayView.h"
 #import "UIView+Anim.h"
 
-static const BOOL showAnothMonthDays = 1;
+static const BOOL showAnothMonthDays = 0;
 
 
 @interface CoreCalendarView ()<JTCalendarDelegate>
@@ -30,6 +30,8 @@ static const BOOL showAnothMonthDays = 1;
 @property (nonatomic,strong) NSMutableArray *datesSelected;
 
 @property (nonatomic,strong) NSDate *todayDate;
+
+@property (nonatomic,assign) NSDate *leftDate,*rightDate;
 
 @end
 
@@ -100,6 +102,15 @@ static const BOOL showAnothMonthDays = 1;
         dayView.dotView.backgroundColor = [UIColor redColor];
         dayView.textLabel.textColor = [UIColor blackColor];
         dayView.textLabel.font = [UIFont systemFontOfSize:14];
+        if(self.isDarkEarlierDays){
+            
+            BOOL isEarlier = [self.mgr.dateHelper date:dayView.date isEqualOrBefore:self.todayDate];
+            
+            if(isEarlier){
+                dayView.textLabel.textColor = [UIColor lightGrayColor];
+            }
+            
+        }
     }
     
     /** 默认日期选中 */
@@ -119,6 +130,8 @@ static const BOOL showAnothMonthDays = 1;
         }
     }];
     
+    
+    
 }
 
 /** 选中日期 */
@@ -131,6 +144,8 @@ static const BOOL showAnothMonthDays = 1;
 /** 日期点击事件 */
 -(void)clickDate:(JTCalendarManager *)calendar dayView:(CoreCalendarDayView *)dayView needScrollToPage:(BOOL)needScrollToPage isAutoClick:(BOOL)isAutoClick{
 
+    if(self.ClickDayBlock != nil ){if(!self.ClickDayBlock(dayView.date)) return;}
+    
     if(dayView.dayModel.offEdit && !isAutoClick){
         
         [dayView shake];
@@ -269,7 +284,13 @@ static const BOOL showAnothMonthDays = 1;
 
 - (BOOL)calendar:(JTCalendarManager *)calendar canDisplayPageWithDate:(NSDate *)date{
 
-    return [self.mgr.dateHelper date:date isEqualOrAfter:self.leftDate andEqualOrBefore:self.rightDate];
+    NSNumber *leftNumber = [self.delegate coreCalendarLeftMonths];
+    NSDate *leftDate = leftNumber == nil ? [NSDate distantPast] : [self dateFromNowWithMonths:leftNumber.integerValue];
+    
+    NSNumber *rightNumber = [self.delegate coreCalendarRightMonths];
+    NSDate *rightDate = rightNumber == nil ? [NSDate distantFuture] : [self dateFromNowWithMonths:rightNumber.integerValue];
+    
+    return [self.mgr.dateHelper date:date isEqualOrAfter:leftDate andEqualOrBefore:rightDate];
 }
 
 

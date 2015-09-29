@@ -31,6 +31,7 @@
 
 @property (nonatomic,strong) NSDate *todayDate;
 
+
 @end
 
 
@@ -76,6 +77,8 @@
 -(void)layoutSubviews{
     
     [super layoutSubviews];
+    
+    NSAssert(self.delegate != nil, @"[Charlin Feng]: delegate must have value!");
     
     CGRect frame = self.bounds;
     
@@ -223,27 +226,13 @@
 }
 
 
--(NSDate *)leftDate{
+-(void)setIsDarkEarlierDays:(BOOL)isDarkEarlierDays{
     
-    if(_leftDate == nil){
-        
-        _leftDate = [NSDate distantPast];
-    }
+    _isDarkEarlierDays = isDarkEarlierDays;
     
-    return _leftDate;
+    [self.mgr reload];
 }
 
--(NSDate *)rightDate{
-    
-    if(_rightDate == nil){
-        
-        _rightDate = [NSDate distantFuture];
-        
-        
-    }
-    
-    return _rightDate;
-}
 
 
 -(NSDate *)dateFromNowWithMonths:(NSInteger)months{
