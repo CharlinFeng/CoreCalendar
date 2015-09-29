@@ -8,6 +8,8 @@
 
 #import "CoreCalendarView.h"
 #import "JTCalendar.h"
+#import "CoreCalendarView+JTCalendarManager.h"
+
 
 @interface CoreCalendarView ()<JTCalendarDelegate>
 
@@ -17,13 +19,17 @@
 
 @property (nonatomic,strong) UIScrollView<JTContent> *calendarView;
 
-
-
-/** 是否为水平模式 */
 @property (nonatomic,assign) CoreCalendarType calendarType;
 
+@property (nonatomic,strong) NSMutableDictionary *eventsByDate;
 
+@property (nonatomic,strong) NSDateFormatter *dateFormatter;
 
+@property (nonatomic,strong) UIButton *todayBtn;
+
+@property (nonatomic,strong) NSMutableArray *datesSelected;
+
+@property (nonatomic,strong) NSDate *todayDate;
 
 @end
 
@@ -57,7 +63,13 @@
     [self addSubview:self.calendarView];
     
     //设置当前日期
-    self.mgr.date = [NSDate date];
+    self.mgr.date = self.todayDate;
+    
+    //添加返回今天按钮
+    [self addSubview:self.todayBtn];
+    
+    //设置可查看月度
+    [self.mgr.dateHelper addToDate:self.todayDate months:-2];
 }
 
 
@@ -69,7 +81,7 @@
     
     CGRect meauF = CGRectMake(0, 0, frame.size.width, self.meauH);
     self.meauView.frame = meauF;
-    
+
     CGRect calendarViewF = CGRectMake(0, self.meauH, frame.size.width, frame.size.height - self.meauH);
     self.calendarView.frame = calendarViewF;
 }
@@ -81,13 +93,15 @@
 
 /** 管理器 */
 -(JTCalendarManager *)mgr{
-    
+
     if(_mgr == nil){
         
         _mgr = [[JTCalendarManager alloc] init];
         
         _mgr.menuView = self.meauView;
         _mgr.contentView = self.calendarView;
+        _mgr.dateHelper.calendar.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+        _mgr.dateHelper.calendar.locale = [NSLocale localeWithLocaleIdentifier:@"zh_CN"];
         _mgr.delegate = self;
     }
     
@@ -116,7 +130,6 @@
         }else{
             _calendarView = [[JTVerticalCalendarView alloc] init];
         }
-        
     }
     
     return _calendarView;
@@ -132,5 +145,109 @@
     return _meauH;
 }
 
+
+
+-(NSDateFormatter *)dateFormatter{
+    
+    if(_dateFormatter == nil){
+        
+        _dateFormatter = [[NSDateFormatter alloc] init];
+        _dateFormatter.dateFormat = @"dd-MM-yyyy";
+    }
+    return _dateFormatter;
+}
+
+
+-(UIButton *)todayBtn{
+    
+    if (_todayBtn == nil){
+        
+        _todayBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_todayBtn setTitle:@"返回" forState:UIControlStateNormal];
+        _todayBtn.backgroundColor = [UIColor whiteColor];
+        [_todayBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_todayBtn setTitleColor:[UIColor lightGrayColor] forState:UIControlStateHighlighted];
+        _todayBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+        _todayBtn.frame = CGRectMake(0, 10, 60, 20);
+        [_todayBtn addTarget:self action:@selector(toToday) forControlEvents:UIControlEventTouchUpInside];
+        _todayBtn.hidden = YES;
+    }
+    
+    return _todayBtn;
+}
+
+
+
+-(void)setTimestampsIn:(NSArray *)timestampsIn{
+    
+    _timestampsIn = [NSMutableArray arrayWithArray:timestampsIn];
+    
+    [self.mgr reload];
+}
+
+
+-(NSMutableArray *)datesSelected{
+    
+    if(_datesSelected == nil){
+        
+        _datesSelected = [NSMutableArray array];
+    }
+    
+    return _datesSelected;
+}
+
+
+
+-(NSArray *)timestampsOut{
+    
+    NSMutableArray *timestampsM = [NSMutableArray arrayWithCapacity:self.datesSelected.count];
+    
+    [self.datesSelected enumerateObjectsUsingBlock:^(NSDate *date, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        NSString *t = [NSString stringWithFormat:@"%.0f",[date timeIntervalSince1970]];
+        
+        [timestampsM addObject:t];
+    }];
+    
+    return [timestampsM copy];
+}
+
+-(NSDate *)todayDate{
+    
+    if(_todayDate == nil){
+        
+        _todayDate = [NSDate date];
+    }
+    
+    return _todayDate;
+}
+
+
+-(NSDate *)leftDate{
+    
+    if(_leftDate == nil){
+        
+        _leftDate = [NSDate distantPast];
+    }
+    
+    return _leftDate;
+}
+
+-(NSDate *)rightDate{
+    
+    if(_rightDate == nil){
+        
+        _rightDate = [NSDate distantFuture];
+        
+        
+    }
+    
+    return _rightDate;
+}
+
+
+-(NSDate *)dateFromNowWithMonths:(NSInteger)months{
+    return [self.mgr.dateHelper addToDate:self.todayDate months:months];
+}
 
 @end
